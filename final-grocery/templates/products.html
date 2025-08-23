@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Products</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- Search section -->
+<div class="search-container">
+    <form action="/search" method="GET">
+        <input type="text" name="q" placeholder="Search products..." value="{{ query if query }}">
+        <button type="submit" class="btn">Search</button>
+    </form>
+</div>
+
+<div class="product-container">
+    <div class="header-section">
+        <h2>Available Products</h2>
+        <div class="cart-section">
+            <a href="/view_cart" class="btn cart-btn">Cart ({{ cart_count }})</a>
+            <a href="/logout" class="btn logout">Logout</a>
+        </div>
+    </div>
+
+    <!-- Product listing with proper for loop -->
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <a href="/product/{{ product[0] }}">
+                <img src="{{ url_for('static', filename=product[3]) }}" alt="{{ product[1] }}"
+                     onerror="this.src='{{ url_for('static', filename='images/default-product.png') }}'">
+                <h3>{{ product[1] }}</h3>
+                <p>{{ product[2] }}</p>
+            </a>
+            <a href="/add_to_cart/{{ product[0] }}" class="btn">Add to Cart</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

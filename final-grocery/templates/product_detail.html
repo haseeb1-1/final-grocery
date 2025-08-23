@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product[1] }} - Product Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ product[1] }}</h1>
+        
+        <div class="product-detail">
+            <img src="{{ url_for('static', filename=product[3]) }}" 
+                 alt="{{ product[1] }}"
+                 onerror="this.src='{{ url_for('static', filename='images/default-product.png') }}'">
+            
+            <div class="product-info">
+                <p><strong>Price:</strong> ${{ product[2] }}</p>
+                <p><strong>Description:</strong> {{ product[4] }}</p>
+                <p><strong>Category:</strong> {{ product[5] }}</p>
+                <p><strong>Stock:</strong> {{ product[6] }}</p>
+                
+                <a href="/add_to_cart/{{ product[0] }}" class="btn">Add to Cart</a>
+            </div>
+        </div>
+
+        {% if user_orders %}
+        <div class="order-history">
+            <h2>Your Order History</h2>
+            <table>
+                <tr>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Order Date</th>
+                </tr>
+                {% for order in user_orders %}
+                <tr>
+                    <td>{{ order[0] }}</td>
+                    <td>{{ order[1] }}</td>
+                    <td>{{ order[2] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
