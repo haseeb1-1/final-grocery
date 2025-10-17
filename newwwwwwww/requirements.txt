@@ -1,0 +1,38 @@
+# Web Framework
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-WTF==1.1.1
+
+# Database
+SQLAlchemy==2.0.21
+
+# Authentication & Security
+Werkzeug==2.3.7
+WTForms==3.0.1
+email-validator==2.0.0
+
+# Voice Assistant Dependencies
+speechrecognition==3.10.0
+pyttsx3==2.90
+pyaudio==0.2.11
+gtts==2.3.2
+playsound==1.2.2
+
+# File Upload & Processing
+Pillow==10.0.0
+
+# Date/Time
+python-dateutil==2.8.2
+
+# Development & Testing
+python-dotenv==1.0.0
+Flask-Testing==0.8.1
+pytest==7.4.2
+
+# Production (Optional)
+gunicorn==21.2.0
+psycopg2-binary==2.9.7  # For PostgreSQL
+
+# Additional Utilities
+requests==2.31.0
+Jinja2==3.1.2

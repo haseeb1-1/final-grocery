@@ -1,0 +1,327 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshMart - Voice-Enabled Grocery Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-shopping-basket"></i>
+                    <span>FreshMart</span>
+                </div>
+                
+                <nav>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}" class="active">Home</a></li>
+                        <li><a href="{{ url_for('products') }}">Products</a></li>
+                        <li><a href="#categories">Categories</a></li>
+                        <li><a href="#deals">Deals</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="header-actions">
+                    {% if session.username %}
+                        <span class="welcome">Welcome, {{ session.username }}</span>
+                        <a href="{{ url_for('orders') }}" class="btn btn-outline">
+                            <i class="fas fa-box"></i> Orders
+                        </a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-outline">
+                            <i class="fas fa-user"></i> Login
+                        </a>
+                        <a href="{{ url_for('register') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    {% endif %}
+                    
+                    <button class="cart-btn" id="cartBtn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">{{ get_cart_count() }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Fresh Groceries Delivered to Your Door</h1>
+            <p>Shop the freshest produce, pantry staples, and household essentials with our voice-enabled shopping experience.</p>
+            <a href="{{ url_for('products') }}" class="btn btn-primary">
+                <i class="fas fa-shopping-bag"></i> Shop Now
+            </a>
+            <button class="btn btn-secondary" id="voiceDemoBtn">
+                <i class="fas fa-robot"></i> Try Voice Shopping
+            </button>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Categories -->
+        <section id="categories">
+            <h2 class="section-title">Shop by Category</h2>
+            <div class="categories">
+                {% for category in categories %}
+                <div class="category-card" onclick="window.location='{{ url_for('products', category_id=category.id) }}'">
+                    <div class="category-icon">
+                        <i class="{{ category.icon }}"></i>
+                    </div>
+                    <div class="category-name">{{ category.name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Featured Products -->
+        <section>
+            <h2 class="section-title">Featured Products</h2>
+            <div class="products">
+                {% for product in featured_products %}
+                <div class="product-card">
+                    <img src="{% if product.image %}{{ url_for('static', filename=product.image) }}{% else %}https://images.unsplash.com/photo-1582515073490-39981397c445?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80{% endif %}" 
+                         alt="{{ product.name }}" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-description">{{ product.description }}</p>
+                        <div class="product-price">${{ "%.2f"|format(product.price) }}</div>
+                        <div class="product-actions">
+                            <div class="quantity-controls">
+                                <button class="quantity-btn">-</button>
+                                <span class="quantity">1</span>
+                                <button class="quantity-btn">+</button>
+                            </div>
+                            <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                <i class="fas fa-cart-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <!-- Voice Assistant -->
+    <div class="voice-assistant">
+        <button class="voice-btn" id="voiceBtn">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <div class="voice-feedback" id="voiceFeedback">
+            <p>Say "Add apples to cart" or "Search for bread"</p>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal-overlay" id="cartModal">
+        <div class="cart-modal">
+            <div class="cart-header">
+                <h2>Your Shopping Cart</h2>
+                <button class="btn btn-outline" id="closeCart">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+            
+            <div class="cart-items" id="cartItems">
+                <!-- Cart items will be loaded here -->
+            </div>
+            
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="cartSubtotal">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery:</span>
+                    <span>$2.99</span>
+                </div>
+                <div class="summary-row summary-total">
+                    <span>Total:</span>
+                    <span id="cartTotal">$0.00</span>
+                </div>
+                
+                <a href="{{ url_for('checkout') }}" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    <i class="fas fa-credit-card"></i> Proceed to Checkout
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>FreshMart</h3>
+                    <p>Your one-stop shop for fresh groceries delivered to your doorstep. Quality products, competitive prices, and excellent service.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('index') }}">Home</a></li>
+                        <li><a href="{{ url_for('products') }}">Products</a></li>
+                        <li><a href="#categories">Categories</a></li>
+                        <li><a href="#deals">Deals</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Returns & Refunds</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Grocery Street, City, State 12345</li>
+                        <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
+                        <li><i class="fas fa-envelope"></i> info@freshmart.com</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2023 FreshMart. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // Voice Assistant Functionality
+        const voiceBtn = document.getElementById('voiceBtn');
+        const voiceFeedback = document.getElementById('voiceFeedback');
+        const voiceDemoBtn = document.getElementById('voiceDemoBtn');
+        
+        function startVoiceDemo() {
+            voiceBtn.classList.add('listening');
+            voiceFeedback.classList.add('active');
+            voiceFeedback.innerHTML = '<p>Demo mode: Try saying "Show me fruits" or "Go to cart"</p>';
+            
+            // Simulate voice command processing
+            setTimeout(() => {
+                const commands = [
+                    'show me fruits',
+                    'go to cart', 
+                    'search for bread',
+                    'view my orders'
+                ];
+                const randomCommand = commands[Math.floor(Math.random() * commands.length)];
+                voiceFeedback.innerHTML = `<p>Heard: "${randomCommand}"</p>`;
+                
+                setTimeout(() => {
+                    processVoiceCommand(randomCommand);
+                }, 1500);
+            }, 2000);
+        }
+        
+        voiceBtn.addEventListener('click', startVoiceDemo);
+        voiceDemoBtn.addEventListener('click', startVoiceDemo);
+        
+        function processVoiceCommand(command) {
+            fetch('/voice_command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    voiceFeedback.innerHTML = `<p>${data.message}</p>`;
+                }
+                
+                setTimeout(() => {
+                    voiceBtn.classList.remove('listening');
+                    voiceFeedback.classList.remove('active');
+                }, 3000);
+            });
+        }
+        
+        // Add to Cart functionality
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                const quantity = this.closest('.product-actions').querySelector('.quantity').textContent;
+                
+                fetch('/add_to_cart/' + productId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ quantity: parseInt(quantity) })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCartCount(data.cart_count);
+                        showNotification(data.message, 'success');
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
+                });
+            });
+        });
+        
+        function updateCartCount(count) {
+            document.getElementById('cartCount').textContent = count;
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
